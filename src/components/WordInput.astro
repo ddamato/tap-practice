@@ -1,0 +1,163 @@
+<word-input>
+  <header>
+    <input type="number" value="3"/>
+    <button type="button" aria-pressed="true">Repeat</button>
+    <span class="key"></span>
+  </header>
+  <div class="canvas">
+    <span class="word"></span>
+    <input type="text"/>
+  </div>
+</word-input>
+
+<style>
+  word-input {
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+  }
+
+  input {
+    font: inherit;
+    text-align: center;
+    padding: .25em;
+    border-radius: 2px;
+    border: 1px solid;
+  }
+
+  button {
+    font: inherit;
+    background: #ece0fd;
+    color: #6200ee;
+    border: 0;
+    border-radius: 2px;
+    padding: .25em 1em;
+    cursor: pointer;
+    transition: .218s ease;
+    font-variant-numeric: tabular-nums;
+  }
+
+  button[aria-pressed="true"] {
+    background: #6200ee;
+    color: #fcfbfe;
+  }
+
+  header {
+    display: flex;
+    gap: .25em;
+  }
+
+  .key {
+    font-family: monospace;
+    margin-inline-start: auto;
+    font-size: 1.5em;
+    background: #ccc;
+    padding: .5em;
+  }
+
+  .canvas {
+    font-size: 4em;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    gap: 1em;
+    margin-block: 1em;
+  }
+</style>
+
+<script>
+  import { nGram } from 'n-gram';
+  import words from '@pages/words.json';
+
+  class WordInput extends window.HTMLElement {
+    constructor() {
+      super();
+      this.ngrams = [];
+    }
+
+    connectedCallback() {
+      this.$ngram = this.querySelector('input[type="number"]');
+      this.$repeat = this.querySelector('button[aria-pressed]');
+      this.$key = this.querySelector('span.key');
+      this.$word = this.querySelector('span.word');
+      this.$input = this.querySelector('input[type="text"]');
+
+      this.$ngram.addEventListener('change', (ev) => this.ngramChange(ev.target.valueAsNumber));
+      this.$repeat.addEventListener('click', () => this.toggleRepeat());
+      this.$input.addEventListener('keyup', (ev) => this.inputKeyup(ev));
+
+      this.ngramChange(this.$ngram.valueAsNumber);
+    }
+
+    timer(seconds = 60) {
+      this.$repeat.textContent = 'Repeat';
+      if (this.$repeat.getAttribute('aria-pressed') === 'false') return;
+      this.controller = new AbortController();
+      this.animationInterval(1000, this.controller.signal, time => {
+        const remaining = seconds - Math.floor(time / 1000);
+        this.$repeat.textContent = String(remaining).padStart(2, '0');
+        if (remaining <= 0) this.reset();
+      });
+    }
+
+    reset() {
+      this?.controller?.abort();
+      this.timer();
+      this.clearInput();
+      this.newWord();
+    }
+
+    animationInterval(ms, signal, callback) {
+      const start = performance.now();
+
+      function frame(time) {
+        if (signal.aborted) return;
+        callback(time - start);
+        scheduleFrame(time);
+      }
+
+      function scheduleFrame(time) {
+        const elapsed = time - start;
+        const roundedElapsed = Math.round(elapsed / ms) * ms;
+        const targetNext = start + roundedElapsed + ms;
+        const delay = targetNext - performance.now();
+        setTimeout(() => requestAnimationFrame(frame), delay);
+      }
+
+      scheduleFrame(start);
+    }
+
+    newWord() {
+      const randomIndex = Math.floor(Math.random() * (this.ngrams.length - 1));
+      this.$word.textContent = this.ngrams[randomIndex];
+    }
+
+    ngramChange(value = 0) {
+      console.log(value);
+      this.ngrams = value > 0
+        ? words.flatMap(nGram(value))
+        : words;
+      this.reset();
+    }
+
+    clearInput() {
+      this.$input.value = '';
+      this.$input.focus();
+    }
+
+    inputKeyup(ev) {
+      this.$key.textContent = ev.key.trim() || ev.code;
+      if (this.$word.textContent !== this.$input.value) return;
+      this.clearInput();
+      if (this.$repeat.getAttribute('aria-pressed') === 'false') this.newWord();
+    }
+
+    toggleRepeat() {
+      const repeat = this.$repeat.getAttribute('aria-pressed') === 'true';
+      this.$repeat.setAttribute('aria-pressed', !repeat);
+      this.reset();
+    }
+  }
+
+  window.customElements.define('word-input', WordInput);
+</script>
