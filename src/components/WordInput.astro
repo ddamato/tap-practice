@@ -5,7 +5,7 @@
   </header>
   <div class="canvas">
     <span class="word"></span>
-    <input type="text" aria-label="typing input" inputmode="none"/>
+    <input type="text" aria-label="typing input" inputmode="none" style="pointer-events:none" />
   </div>
   <span class="key"></span>
 </word-input>
@@ -153,6 +153,7 @@
     clearInput() {
       this.$input.value = '';
       this.$input.focus();
+      this.$input.blur();
     }
 
     inputKeyup(ev) {
