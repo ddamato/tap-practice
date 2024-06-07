@@ -2,24 +2,24 @@
   <header>
     <input type="number" value="3" aria-label="ngram"/>
     <button type="button" aria-pressed="true">Repeat</button>
-    <span class="key"></span>
   </header>
   <div class="canvas">
     <span class="word"></span>
-    <input type="text" aria-label="typing input"/>
+    <input type="text" aria-label="typing input" virtualkeyboardpolicy="manual"/>
   </div>
+  <span class="key"></span>
 </word-input>
 
 <style>
   word-input {
-    display: flex;
-    flex-direction: column;
+    display: block;
     padding: 2rem;
+    text-align: center;
   }
 
   input {
     font: inherit;
-    text-align: center;
+    text-align: inherit;
     padding: .25em;
     border-radius: 2px;
     border: 1px solid;
@@ -43,13 +43,16 @@
   }
 
   header {
-    display: flex;
+    display: inline-flex;
     gap: .25em;
+  }
+
+  input[type="number"] {
+    width: 8ch;
   }
 
   .key {
     font-family: monospace;
-    margin-inline-start: auto;
     font-size: 1.5em;
     background: #ccc;
     padding: .5em;
@@ -60,6 +63,7 @@
     display: flex;
     flex-direction: column;
     text-align: center;
+    align-items: center;
     gap: 1em;
     margin-block: 1em;
   }
@@ -148,6 +152,7 @@
     clearInput() {
       this.$input.value = '';
       this.$input.focus();
+      window.navigator?.virtualKeyboard?.hide();
     }
 
     inputKeyup(ev) {
