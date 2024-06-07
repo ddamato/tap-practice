@@ -5,7 +5,7 @@
   </header>
   <div class="canvas">
     <span class="word"></span>
-    <input type="text" aria-label="typing input" virtualkeyboardpolicy="manual"/>
+    <input type="text" aria-label="typing input" inputmode="none"/>
   </div>
   <span class="key"></span>
 </word-input>
@@ -23,6 +23,7 @@
     padding: .25em;
     border-radius: 2px;
     border: 1px solid;
+    max-width: 100%;
   }
 
   button {
@@ -152,7 +153,6 @@
     clearInput() {
       this.$input.value = '';
       this.$input.focus();
-      window.navigator?.virtualKeyboard?.hide();
     }
 
     inputKeyup(ev) {
