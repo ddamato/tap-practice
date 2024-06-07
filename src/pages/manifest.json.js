@@ -7,8 +7,8 @@ const icons = [
     sizes: 'any',
     type: 'image/svg+xml'
   }, {
-    src: '/album-art/index.png',
-    sizes: '1000x1000',
+    src: '/android-chrome-512x512.png',
+    sizes: '512x512',
     type: 'image/png'
   }
 ]
@@ -20,10 +20,10 @@ export async function GET() {
     description,
     icons,
     start_url: '/',
-    background_color: '#141e23',
+    background_color: '#6200ee',
     display: 'standalone',
     scope: '/',
-    theme_color: '#f5bc00'
+    theme_color: '#6200ee'
   };
 
   return new Response(JSON.stringify(body), {
