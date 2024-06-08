@@ -1,6 +1,6 @@
 <word-input>
   <header>
-    <input type="number" value="3" aria-label="ngram"/>
+    <input type="number" aria-label="ngram"/>
     <button type="button" aria-pressed="true">Repeat</button>
   </header>
   <div class="canvas">
@@ -84,6 +84,8 @@
 <script>
   import { nGram } from 'n-gram';
   import words from '@pages/_words.json';
+  const LOCALSTORAGE_NGRAM = 'tap-ngram';
+  const DEFAULT_NGRAM = 3;
 
   class WordInput extends window.HTMLElement {
     constructor() {
@@ -102,7 +104,9 @@
       this.$repeat.addEventListener('click', () => this.toggleRepeat());
       this.$input.addEventListener('keyup', (ev) => this.inputKeyup(ev));
 
-      this.ngramChange(this.$ngram.valueAsNumber);
+      const storage = parseInt(window.localStorage.getItem(LOCALSTORAGE_NGRAM), 10);
+      const init = !isNaN(storage) ? storage : DEFAULT_NGRAM;
+      this.ngramChange(init);
     }
 
     timer(seconds = 60) {
@@ -153,6 +157,8 @@
         ? words.flatMap(nGram(value))
         : words;
       this.reset();
+      this.$ngram.value = value;
+      window.localStorage.setItem(LOCALSTORAGE_NGRAM, String(value));
     }
 
     clearInput() {
