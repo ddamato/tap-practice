@@ -20,7 +20,7 @@ const icons = [
 export async function GET() {
   const body = {
     name: title,
-    short_name: 'tap',
+    short_name: 'Do Tap',
     description,
     icons,
     start_url: '/',
