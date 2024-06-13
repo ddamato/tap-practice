@@ -85,6 +85,7 @@
   import { nGram } from 'n-gram';
   import words from '@pages/_words.json';
   const LOCALSTORAGE_NGRAM = 'tap-ngram';
+  const LOCALSTORAGE_REPEAT = true;
   const DEFAULT_NGRAM = 3;
 
   class WordInput extends window.HTMLElement {
@@ -104,9 +105,11 @@
       this.$repeat.addEventListener('click', () => this.toggleRepeat());
       this.$input.addEventListener('keyup', (ev) => this.inputKeyup(ev));
 
-      const storage = parseInt(window.localStorage.getItem(LOCALSTORAGE_NGRAM), 10);
-      const init = !isNaN(storage) ? storage : DEFAULT_NGRAM;
-      this.ngramChange(init);
+      const repeatStorage = window.localStorage.getItem(LOCALSTORAGE_REPEAT) === 'true';
+      this.toggleRepeat(repeatStorage);
+
+      const ngramStorage = parseInt(window.localStorage.getItem(LOCALSTORAGE_NGRAM), 10);
+      this.ngramChange(!isNaN(ngramStorage) ? ngramStorage : DEFAULT_NGRAM);
     }
 
     timer(seconds = 60) {
@@ -125,6 +128,20 @@
       this.timer();
       this.clearInput();
       this.newWord();
+      this.resize();
+    }
+
+    resize() {
+      this.$word.style.removeProperty('fontSize');
+      this.$input.style.removeProperty('fontSize');
+      const canvasWidth = this.$word.parentElement.clientWidth;
+      const wordWidth = this.$word.clientWidth;
+      if (wordWidth > canvasWidth) {
+        const percent = canvasWidth / wordWidth;
+        const fontSize = `${ (percent * 100).toFixed(0) }%`;
+        this.$word.style.fontSize = fontSize;
+        this.$input.style.fontSize = fontSize;
+      }
     }
 
     animationInterval(ms, signal, callback) {
@@ -173,9 +190,12 @@
       if (this.$repeat.getAttribute('aria-pressed') === 'false') this.newWord();
     }
 
-    toggleRepeat() {
-      const repeat = this.$repeat.getAttribute('aria-pressed') === 'true';
-      this.$repeat.setAttribute('aria-pressed', !repeat);
+    toggleRepeat(repeat) {
+      if (typeof repeat !== 'boolean') {
+        repeat = !(this.$repeat.getAttribute('aria-pressed') === 'true');
+      }
+      window.localStorage.setItem(LOCALSTORAGE_REPEAT, String(repeat));
+      this.$repeat.setAttribute('aria-pressed', repeat);
       this.reset();
     }
   }
